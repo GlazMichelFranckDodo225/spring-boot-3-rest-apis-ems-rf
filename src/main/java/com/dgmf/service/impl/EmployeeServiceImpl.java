@@ -7,21 +7,23 @@ import com.dgmf.mapper.EmployeeMapper;
 import com.dgmf.repository.EmployeeRepository;
 import com.dgmf.service.EmployeeService;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class EmployeeServiceImpl implements EmployeeService {
     private final EmployeeRepository employeeRepository;
-    private final ModelMapper modelMapper;
+    private final EmployeeMapper employeeMapper;
 
     @Override
     public EmployeeDtoResponse addEmployee(EmployeeDtoRequest employeeDtoRequest) {
-        Employee employee = EmployeeMapper.mapToEmployee(employeeDtoRequest);
+        Employee employee = employeeMapper.mapToEmployee(employeeDtoRequest);
         Employee savedEmployee = employeeRepository.save(employee);
         EmployeeDtoResponse employeeDtoResponse =
-                EmployeeMapper.mapToEmployeeDtoResponse(savedEmployee);
+                employeeMapper.mapToEmployeeDtoResponse(savedEmployee);
 
         return employeeDtoResponse;
     }
@@ -32,9 +34,28 @@ public class EmployeeServiceImpl implements EmployeeService {
                 .orElseThrow(() -> new RuntimeException("Employee with id " +
                         employeeId + " Not Found"));
 
+                // modelMapper.map(employeeFromDb, EmployeeDtoResponse.class);
         EmployeeDtoResponse employeeDtoResponse =
-                modelMapper.map(employeeFromDb, EmployeeDtoResponse.class);
+                // employeeMapper.mapToEmployeeDtoResponse(employeeFromDb);
+                employeeMapper.mapToEmployeeDtoResponse(employeeFromDb);
+
 
         return employeeDtoResponse;
+    }
+
+    @Override
+    public List<EmployeeDtoResponse> getAllEmployees() {
+        List<Employee> employees = employeeRepository.findAll();
+
+                // employees.forEach(employee -> modelMapper.map(employee, EmployeeDtoResponse.class));
+                /*employees.stream().map(
+                        employee -> modelMapper.map(employee, EmployeeDtoResponse.class)
+                ).collect(Collectors.toList());*/
+        List<EmployeeDtoResponse> employeeDtoResponses = employees.stream()
+                // .map(employee -> employeeMapper.mapToEmployeeDtoResponse(employee))
+                .map(employeeMapper::mapToEmployeeDtoResponse)
+                .collect(Collectors.toList());
+
+        return employeeDtoResponses ;
     }
 }
