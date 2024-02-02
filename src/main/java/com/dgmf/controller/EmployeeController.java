@@ -24,4 +24,12 @@ public class EmployeeController {
                 HttpStatus.CREATED
         );
     }
+
+    // Get Employee REST API
+    @GetMapping("/{id}")
+    public ResponseEntity<EmployeeDtoResponse> getEmployee(
+            @PathVariable("id") Long employeeId
+    ) {
+        return ResponseEntity.ok(employeeService.getEmployeeById(employeeId));
+    }
 }

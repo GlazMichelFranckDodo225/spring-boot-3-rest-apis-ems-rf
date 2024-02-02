@@ -5,4 +5,5 @@ import com.dgmf.dto.EmployeeDtoResponse;
 
 public interface EmployeeService {
     EmployeeDtoResponse addEmployee(EmployeeDtoRequest employeeDtoRequest);
+    EmployeeDtoResponse getEmployeeById(Long employeeId);
 }
