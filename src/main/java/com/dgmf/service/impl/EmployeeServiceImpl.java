@@ -3,9 +3,11 @@ package com.dgmf.service.impl;
 import com.dgmf.dto.EmployeeDtoRequest;
 import com.dgmf.dto.EmployeeDtoResponse;
 import com.dgmf.entity.Employee;
+import com.dgmf.exception.ResourceNotFoundException;
 import com.dgmf.mapper.EmployeeMapper;
 import com.dgmf.repository.EmployeeRepository;
 import com.dgmf.service.EmployeeService;
+import jakarta.persistence.criteria.From;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -57,5 +59,33 @@ public class EmployeeServiceImpl implements EmployeeService {
                 .collect(Collectors.toList());
 
         return employeeDtoResponses ;
+    }
+
+    @Override
+    public EmployeeDtoResponse updateEmployee(
+            Long employeeId, EmployeeDtoRequest employeeDtoRequest
+    ) {
+        // Employee From DB
+        Employee employeeFromDB = employeeRepository.findById(employeeId)
+                .orElseThrow(
+                        () -> new ResourceNotFoundException(
+                        "Employee with the Given Id " +
+                                employeeId + " Does Not Exists"
+                    )
+                );
+
+        // Update Employee
+        employeeFromDB.setEmail(employeeDtoRequest.getEmail());
+        employeeFromDB.setFirstName(employeeDtoRequest.getFirstName());
+        employeeFromDB.setLastName(employeeDtoRequest.getLastName());
+
+        // Save Updated Employee
+        Employee updatedEmployee = employeeRepository.save(employeeFromDB);
+
+        // Convert to Dto
+        EmployeeDtoResponse employeeDtoResponse = employeeMapper
+                .mapToEmployeeDtoResponse(updatedEmployee);
+
+        return employeeDtoResponse;
     }
 }
